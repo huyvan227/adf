@@ -1,0 +1,25 @@
+{
+	"name": "Master Pipeline 2AM",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2020-12-02T10:28:00",
+				"timeZone": "SE Asia Standard Time",
+				"schedule": {
+					"minutes": [
+						5
+					],
+					"hours": [
+						2
+					]
+				}
+			}
+		}
+	}
+}

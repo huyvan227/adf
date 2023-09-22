@@ -1,0 +1,636 @@
+{
+	"name": "FINANCE_MASTER_PIPELINE_sample",
+	"properties": {
+		"activities": [
+			{
+				"name": "Execute Copy Sharepoint to Blob",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Set Current Time",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "CR COPY SHAREPOINT TO BLOB",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"current_data_time": {
+							"value": "@variables('current_data_time')",
+							"type": "Expression"
+						},
+						"batch_id": {
+							"value": "@variables('batch_id')",
+							"type": "Expression"
+						},
+						"GROUP_NAME": {
+							"value": "@pipeline().parameters.GROUP_NAME",
+							"type": "Expression"
+						},
+						"GROUP_VALUE": {
+							"value": "@pipeline().parameters.GROUP_VALUE",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Set Current Time",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set Batch ID",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "current_data_time",
+					"value": {
+						"value": "@formatDateTime(addhours(utcnow(), 7), 'yyyyMMddHHmm')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Execute Convert Excel",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute Copy Sharepoint to Blob",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "CR CONVERT EXCEL MASTER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"batch_id": {
+							"value": "@variables('batch_id')",
+							"type": "Expression"
+						},
+						"current_data_time": {
+							"value": "@variables('current_data_time')",
+							"type": "Expression"
+						},
+						"GROUP_NAME": {
+							"value": "@pipeline().parameters.GROUP_NAME",
+							"type": "Expression"
+						},
+						"GROUP_VALUE": {
+							"value": "@pipeline().parameters.GROUP_VALUE",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Start Batch",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Start Synapse",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlDWSource",
+						"sqlReaderStoredProcedureName": "[ADF].[PROC_ETL_START_BATCH]",
+						"storedProcedureParameters": {
+							"pBATCH_TYPE_ID": {
+								"type": "Int32",
+								"value": {
+									"value": "@pipeline().parameters.batch_type",
+									"type": "Expression"
+								}
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "SBC_Azure_Synapse1",
+						"type": "DatasetReference",
+						"parameters": {
+							"TGT_TABLE": "DUMMY"
+						}
+					}
+				}
+			},
+			{
+				"name": "Set Batch ID",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Start Batch",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "batch_id",
+					"value": {
+						"value": "@string(activity('Start batch').output.firstRow.BATCH_ID)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Execute SDE Master",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute Convert Excel",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "CR SDE MASTER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"current_data_time": {
+							"value": "@variables('current_data_time')",
+							"type": "Expression"
+						},
+						"batch_id": {
+							"value": "@variables('batch_id')",
+							"type": "Expression"
+						},
+						"GROUP_NAME": {
+							"value": "@pipeline().parameters.GROUP_NAME",
+							"type": "Expression"
+						},
+						"GROUP_VALUE": {
+							"value": "@pipeline().parameters.GROUP_VALUE",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Execute SIL",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute SDE Master",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "CR SIL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"current_data_time": {
+							"value": "@variables('current_data_time')",
+							"type": "Expression"
+						},
+						"batch_id": {
+							"value": "@variables('batch_id')",
+							"type": "Expression"
+						},
+						"GROUP_NAME": {
+							"value": "@pipeline().parameters.GROUP_NAME",
+							"type": "Expression"
+						},
+						"GROUP_VALUE": {
+							"value": "@pipeline().parameters.GROUP_VALUE",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Start Synapse",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "CR SYS RESUME SYNAPSE",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Finalize - Fail Copy",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute Copy Sharepoint to Blob",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "CR FINALIZE PIPELINE",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"batch_id": {
+							"value": "@variables('batch_id')",
+							"type": "Expression"
+						},
+						"log_status": "INFO",
+						"pause_dwh": {
+							"value": "@pipeline().parameters.pause_dwh_after_finish",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Finalize - Fail Convert",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute Convert Excel",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "CR FINALIZE PIPELINE",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"batch_id": {
+							"value": "@variables('batch_id')",
+							"type": "Expression"
+						},
+						"log_status": "INFO",
+						"pause_dwh": {
+							"value": "@pipeline().parameters.pause_dwh_after_finish",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Finalize - Fail SDE",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute SDE Master",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "CR FINALIZE PIPELINE",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"batch_id": {
+							"value": "@variables('batch_id')",
+							"type": "Expression"
+						},
+						"log_status": "INFO",
+						"pause_dwh": {
+							"value": "@pipeline().parameters.pause_dwh_after_finish",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Finalize - Fail SIL",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute SIL",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "CR FINALIZE PIPELINE",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"batch_id": {
+							"value": "@variables('batch_id')",
+							"type": "Expression"
+						},
+						"log_status": "INFO",
+						"pause_dwh": {
+							"value": "@pipeline().parameters.pause_dwh_after_finish",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Finalize - Success Pipeline",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Refresh Power BI",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Notify Missing Data",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "CR FINALIZE PIPELINE",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"batch_id": {
+							"value": "@variables('batch_id')",
+							"type": "Expression"
+						},
+						"log_status": "INFO",
+						"pause_dwh": {
+							"value": "@pipeline().parameters.pause_dwh_after_finish",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Refresh Power BI",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute SIL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "CR REFRESH PBI DATASET",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Update Fail Refresh Power BI Logs",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Refresh Power BI",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[ADF].[PROC_ETL_LOG_MESSAGE]",
+					"storedProcedureParameters": {
+						"pBATCH_ID": {
+							"value": {
+								"value": "@variables('batch_id')",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						},
+						"pERROR_CODE": {
+							"value": null,
+							"type": "String"
+						},
+						"pERROR_MESSAGE": {
+							"value": null,
+							"type": "String"
+						},
+						"pJOB_ID": {
+							"value": null,
+							"type": "Int64"
+						},
+						"pLOG_MESSAGE": {
+							"value": {
+								"value": "Fail to refresh Power BI dataset",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"pLOG_STATUS": {
+							"value": "ERROR",
+							"type": "String"
+						},
+						"pSTAGE_GROUP": {
+							"value": null,
+							"type": "String"
+						},
+						"pJOB_NAME": {
+							"value": null,
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "SBC_Azure_Synapse",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Finalize - Fail Refresh Power BI",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Update Fail Refresh Power BI Logs",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "CR FINALIZE PIPELINE",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"batch_id": {
+							"value": "@variables('batch_id')",
+							"type": "Expression"
+						},
+						"log_status": "INFO",
+						"pause_dwh": {
+							"value": "@pipeline().parameters.pause_dwh_after_finish",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Notify Missing Data",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Execute SIL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "NOTIFY MISSING DATA",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"current_data_time": {
+							"value": "@variables('current_data_time')",
+							"type": "Expression"
+						},
+						"batch_id": {
+							"value": "@variables('batch_id')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Finalize - Fail Notify Missing Data",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Notify Missing Data",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "CR FINALIZE PIPELINE",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"batch_id": {
+							"value": "@variables('batch_id')",
+							"type": "Expression"
+						},
+						"log_status": "INFO",
+						"pause_dwh": {
+							"value": "@pipeline().parameters.pause_dwh_after_finish",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"batch_type": {
+				"type": "int",
+				"defaultValue": 0
+			},
+			"pause_dwh_after_finish": {
+				"type": "int",
+				"defaultValue": 1
+			},
+			"GROUP_NAME": {
+				"type": "string"
+			},
+			"GROUP_VALUE": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"current_data_time": {
+				"type": "String"
+			},
+			"batch_id": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "FINANCE"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-09-21T14:44:37Z",
+		"lastUpdateUtc": "2022-12-08T10:14:25Z",
+		"createTimeUtc": "0001-01-01T00:00:00Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

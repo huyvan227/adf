@@ -1,0 +1,7 @@
+{
+	"name": "IR-PROD",
+	"properties": {
+		"type": "SelfHosted",
+		"description": "IR Production"
+	}
+}

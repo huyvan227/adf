@@ -1,0 +1,41 @@
+{
+	"name": "Master Pipeline 8AM-10AM-3PM-6PM",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "CR MASTER PIPELINE",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"batch_type": 0,
+					"pause_dwh_after_finish": 1,
+					"GROUP_NAME": "01",
+					"GROUP_VALUE": "DAILY"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2020-12-02T10:30:00",
+				"timeZone": "SE Asia Standard Time",
+				"schedule": {
+					"minutes": [
+						10
+					],
+					"hours": [
+						8,
+						10,
+						15,
+						18
+					]
+				}
+			}
+		}
+	}
+}

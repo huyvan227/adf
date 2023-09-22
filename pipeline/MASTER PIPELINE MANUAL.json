@@ -1,0 +1,63 @@
+{
+	"name": "MASTER PIPELINE MANUAL",
+	"properties": {
+		"activities": [
+			{
+				"name": "SDE",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PRE_SDE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SDE",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "SIL",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "SDE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SIL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "PRE_SDE",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PRE_SDE",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2023-09-21T14:44:37Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,193 @@
+{
+	"name": "FINALIZE_PIPELINE",
+	"properties": {
+		"activities": [
+			{
+				"name": "End Batch",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[ADF].[PROC_ETL_END_BATCH]",
+					"storedProcedureParameters": {
+						"pBATCH_ID": {
+							"value": {
+								"value": "@int(pipeline().parameters.batch_id)",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "SBC_Azure_Synapse",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Get Logs",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "End Batch",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlDWSource",
+						"sqlReaderStoredProcedureName": "[ADF].[PROC_ETL_GET_LOG]",
+						"storedProcedureParameters": {
+							"pBATCH_ID": {
+								"type": "Int64",
+								"value": {
+									"value": "@int(pipeline().parameters.batch_id)",
+									"type": "Expression"
+								}
+							},
+							"pLOG_STATUS": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.log_status",
+									"type": "Expression"
+								}
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "SBC_Azure_Synapse1",
+						"type": "DatasetReference",
+						"parameters": {
+							"TGT_TABLE": "Dummy"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Send Logs Email",
+				"type": "AzureFunctionActivity",
+				"dependsOn": [
+					{
+						"activity": "Get Logs",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"functionName": "send_email",
+					"method": "POST",
+					"body": {
+						"value": "@concat('{\"to\": \"',pipeline().parameters.to,'\",\"subject\": \"',pipeline().parameters.subject,'\",\"header\": \"',pipeline().parameters.header,'\",\"message\": \"',pipeline().parameters.message,'\",\"message_type\": \"',pipeline().parameters.message_type,'\",\"json_table\": ',activity('Get Logs').output.value,'}')",
+						"type": "Expression"
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "az_function_helpers",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "If Condition1",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Send Logs Email",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.pause_dwh, 1)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Pause Synapse",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "CR SYS PAUSE SYNAPSE",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"batch_id": {
+				"type": "string"
+			},
+			"log_status": {
+				"type": "string"
+			},
+			"to": {
+				"type": "string",
+				"defaultValue": "jadev@sabeco.com.vn,khoattd@sabeco.com.vn"
+			},
+			"subject": {
+				"type": "string",
+				"defaultValue": "ADF Pipeline Report"
+			},
+			"message": {
+				"type": "string",
+				"defaultValue": "<div>This is the report for pipeline.</div>"
+			},
+			"message_type": {
+				"type": "string",
+				"defaultValue": "html"
+			},
+			"header": {
+				"type": "string",
+				"defaultValue": "<div>Dear all,</div>"
+			},
+			"pause_dwh": {
+				"type": "int"
+			}
+		},
+		"folder": {
+			"name": "FINANCE"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-09-21T14:44:31Z",
+		"lastUpdateUtc": "2021-12-16T03:09:20Z",
+		"createTimeUtc": "0001-01-01T00:00:00Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

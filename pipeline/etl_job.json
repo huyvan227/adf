@@ -1,0 +1,74 @@
+{
+	"name": "etl_job",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "SqlDWSink",
+						"preCopyScript": "truncate table [ADF].[ETL_JOB_V2]",
+						"writeBehavior": "Insert",
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "Blob_Storage",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "transform-csv-phase2",
+							"filename": "job_v2.csv"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "SBC_Azure_Synapse",
+						"type": "DatasetReference",
+						"parameters": {
+							"TGT_TABLE": "[ADF].[ETL_JOB_V2]"
+						}
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "FINANCE"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-09-21T14:44:33Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,57 @@
+{
+	"name": "MASTER PIPELINE MANUAL TEST",
+	"properties": {
+		"activities": [
+			{
+				"name": "PRE_SDE",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PRE_SDE",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "SEND EMAIL",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PRE_SDE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SEND NOTIFICATION EMAIL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"PipelineRunID": {
+							"value": "@pipeline().RunId",
+							"type": "Expression"
+						},
+						"PreveiousActivityStatus": {
+							"value": "SUCCESS",
+							"type": "Expression"
+						},
+						"StartDateTime": {
+							"value": "@replace(formatdatetime(addhours(pipeline().TriggerTime,7),'dd-MM-yyyyTH:mm:ss'),'T', ' ')",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2023-09-21T14:44:37Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

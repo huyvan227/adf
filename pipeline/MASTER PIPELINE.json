@@ -1,0 +1,409 @@
+{
+	"name": "MASTER PIPELINE",
+	"properties": {
+		"activities": [
+			{
+				"name": "SDE",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PRE_SDE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SDE",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "SIL",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "SDE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SIL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "START SYNAPSE",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SYS RESUME SYNAPSE",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "WAIT 1 MIN",
+				"type": "Wait",
+				"dependsOn": [
+					{
+						"activity": "START SYNAPSE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": 60
+				}
+			},
+			{
+				"name": "PAUSE SYNAPSE 5",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "REFRESH PBI DATASET",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SYS PAUSE SYNAPSE",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "PAUSE SYNAPSE 2",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "SDE",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SYS PAUSE SYNAPSE",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "PAUSE SYNAPSE 3",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "SIL",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SYS PAUSE SYNAPSE",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "PRE_SDE",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "WAIT 1 MIN",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PRE_SDE",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "DELETE PROCESSED DATA",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "SIL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "DELETE PROCESSED DATA",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "SEND EMAIL FAIL 1",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PRE_SDE",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SEND NOTIFICATION EMAIL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"PipelineRunID": {
+							"value": "@pipeline().RunId",
+							"type": "Expression"
+						},
+						"PreveiousActivityStatus": {
+							"value": "ERROR",
+							"type": "Expression"
+						},
+						"StartDateTime": {
+							"value": "@replace(formatdatetime(addhours(pipeline().TriggerTime,7),'dd-MM-yyyyTH:mm:ss'),'T', ' ')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "SEND EMAIL FAIL 2",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "SDE",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SEND NOTIFICATION EMAIL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"PipelineRunID": {
+							"value": "@pipeline().RunId",
+							"type": "Expression"
+						},
+						"PreveiousActivityStatus": {
+							"value": "ERROR",
+							"type": "Expression"
+						},
+						"StartDateTime": {
+							"value": "@replace(formatdatetime(addhours(pipeline().TriggerTime,7),'dd-MM-yyyyTH:mm:ss'),'T', ' ')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "SEND EMAIL FAIL 3",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "SIL",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SEND NOTIFICATION EMAIL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"PipelineRunID": {
+							"value": "@pipeline().RunId",
+							"type": "Expression"
+						},
+						"PreveiousActivityStatus": {
+							"value": "ERROR",
+							"type": "Expression"
+						},
+						"StartDateTime": {
+							"value": "@replace(formatdatetime(addhours(pipeline().TriggerTime,7),'dd-MM-yyyyTH:mm:ss'),'T', ' ')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "SEND EMAIL SUCCESS",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PAUSE SYNAPSE 5",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SEND NOTIFICATION EMAIL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"PipelineRunID": {
+							"value": "@pipeline().RunId",
+							"type": "Expression"
+						},
+						"PreveiousActivityStatus": {
+							"value": "SUCCESS",
+							"type": "Expression"
+						},
+						"StartDateTime": {
+							"value": "@replace(formatdatetime(addhours(pipeline().TriggerTime,7),'dd-MM-yyyyTH:mm:ss'),'T', ' ')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "PAUSE SYNAPSE 1",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PRE_SDE",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SYS PAUSE SYNAPSE",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "REFRESH PBI DATASET",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "SIL",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "REFRESH PBI DATASET",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "PAUSE SYNAPSE 4",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "REFRESH PBI DATASET",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SYS PAUSE SYNAPSE",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "SEND EMAIL FAIL 4",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "REFRESH PBI DATASET",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SEND NOTIFICATION EMAIL",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"PipelineRunID": {
+							"value": "@pipeline().RunId",
+							"type": "Expression"
+						},
+						"PreveiousActivityStatus": {
+							"value": "ERROR",
+							"type": "Expression"
+						},
+						"StartDateTime": {
+							"value": "@replace(formatdatetime(addhours(pipeline().TriggerTime,7),'dd-MM-yyyyTH:mm:ss'),'T', ' ')",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2023-09-21T14:44:37Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

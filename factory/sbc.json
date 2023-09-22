@@ -1,0 +1,9 @@
+{
+	"name": "sbc",
+	"location": "southeastasia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "9fc6ef10-2e7d-42e1-8a6b-1fcb09ec1e08",
+		"tenantId": "7a7d3dcf-70fd-4ebb-a423-e776afbcd4b8"
+	}
+}

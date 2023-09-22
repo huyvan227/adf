@@ -1,0 +1,13 @@
+{
+	"name": "az_function_phase2",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureFunction",
+		"typeProperties": {
+			"functionAppUrl": "https://az-function-phase2.azurewebsites.net",
+			"authentication": "Anonymous",
+			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQDQwQ0E5MzdDLTVDRDUtNDc3Ny05NTlELTU2NjRBN0FGQ0IyOV81YjcwMzg5MC0wZmEwLTQ4MzktYTllZi0zNDM3NjYwOTFkZGMiDQp9"
+		}
+	}
+}

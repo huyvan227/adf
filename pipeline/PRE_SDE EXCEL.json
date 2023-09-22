@@ -1,0 +1,218 @@
+{
+	"name": "PRE_SDE EXCEL",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get Job Parameter",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlDWSource",
+						"sqlReaderQuery": "SELECT * FROM ADF.ETL_EXCEL_PARAMETER\nWHERE IS_ACTIVE_FLG = 1",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "SBC_Azure_Synapse",
+						"type": "DatasetReference",
+						"parameters": {
+							"TGT_TABLE": "ADF.ETL_EXCEL_PARAMETER"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Execute Dynamic Load Excel",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get Job Parameter",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get Job Parameter').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Generate File Name",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlDWSource",
+									"sqlReaderStoredProcedureName": "[ADF].[GET_EXCEL_FILE_NAME]",
+									"storedProcedureParameters": {
+										"CONFIG": {
+											"type": "String",
+											"value": {
+												"value": "@{item().CONFIG_KEY}",
+												"type": "Expression"
+											}
+										},
+										"INPUT_FILE": {
+											"type": "String",
+											"value": {
+												"value": "@{item().INPUT_FILE}",
+												"type": "Expression"
+											}
+										},
+										"OUTPUT_FILE": {
+											"type": "String",
+											"value": {
+												"value": "@{item().OUTPUT_FILE}",
+												"type": "Expression"
+											}
+										}
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "SBC_Azure_Synapse",
+									"type": "DatasetReference",
+									"parameters": {
+										"TGT_TABLE": "N/A"
+									}
+								},
+								"firstRowOnly": true
+							}
+						},
+						{
+							"name": "Get Metadata Excel File",
+							"type": "GetMetadata",
+							"dependsOn": [
+								{
+									"activity": "Generate File Name",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "Blob_Storage",
+									"type": "DatasetReference",
+									"parameters": {
+										"container": {
+											"value": "@{item().INPUT_CONTAINER}",
+											"type": "Expression"
+										},
+										"filename": {
+											"value": "@{activity('Generate File Name').output.firstRow.INPUT_FILE}",
+											"type": "Expression"
+										}
+									}
+								},
+								"fieldList": [
+									"exists"
+								],
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							}
+						},
+						{
+							"name": "If Exist",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "Get Metadata Excel File",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@equals(activity('Get Metadata Excel File').output.exists,true)\n",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "Dynamic Load Excel Files",
+										"type": "ExecutePipeline",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"pipeline": {
+												"referenceName": "DYNAMIC LOAD EXCEL FILES",
+												"type": "PipelineReference"
+											},
+											"waitOnCompletion": true,
+											"parameters": {
+												"schemaName": {
+													"value": "@{item().SCHEMA_NAME}",
+													"type": "Expression"
+												},
+												"configKey": {
+													"value": "@{item().CONFIG_KEY}",
+													"type": "Expression"
+												},
+												"inputContainer": {
+													"value": "@{item().INPUT_CONTAINER}",
+													"type": "Expression"
+												},
+												"inputFile": {
+													"value": "@{activity('Generate File Name').output.firstRow.INPUT_FILE}",
+													"type": "Expression"
+												},
+												"outputContainer": {
+													"value": "@{item().OUTPUT_CONTAINER}",
+													"type": "Expression"
+												},
+												"outputFile": {
+													"value": "@{activity('Generate File Name').output.firstRow.OUTPUT_FILE}",
+													"type": "Expression"
+												}
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2023-09-21T14:44:34Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,83 @@
+{
+	"name": "SIL MANUAL",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get SIL Job Information",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlDWSource",
+						"sqlReaderStoredProcedureName": "[ADF].[PRC_ETL_JOB_SCRIPT_MANUAL]",
+						"storedProcedureParameters": {
+							"JOB_NAME": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.JOB_NAME",
+									"type": "Expression"
+								}
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "SBC_Azure_Synapse",
+						"type": "DatasetReference",
+						"parameters": {
+							"TGT_TABLE": "N/A"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "CALL SIL STORED PROCEDURE",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Get SIL Job Information",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": {
+						"value": "@activity('Get SIL Job Information').output.value[0].JOB_SCRIPT",
+						"type": "Expression"
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "SBC_Azure_Synapse",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"JOB_NAME": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-09-21T14:44:31Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

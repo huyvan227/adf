@@ -1,0 +1,30 @@
+{
+	"name": "System Auto Stop",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "SYS PAUSE SYNAPSE",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"subscriptions": "1ff46658-2f7b-48bd-8e49-52fadef045ac",
+					"resourceGroups": "rgBIPRD",
+					"servers": "sbcdwhprd",
+					"databases": "dwhprd"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Hour",
+				"interval": 6,
+				"startTime": "2020-04-21T00:00:00Z",
+				"timeZone": "UTC"
+			}
+		}
+	}
+}

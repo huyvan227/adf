@@ -1,0 +1,30 @@
+{
+	"name": "EXC",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SBC_Blob_Storage",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"SHEET_NAME": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Excel",
+		"typeProperties": {
+			"sheetName": {
+				"value": "@dataset().SHEET_NAME",
+				"type": "Expression"
+			},
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": "excel",
+				"container": "transform-csv-phase2"
+			},
+			"firstRowAsHeader": true
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

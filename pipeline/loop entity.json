@@ -1,0 +1,148 @@
+{
+	"name": "loop entity",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lookup1_copy2",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlDWSource",
+						"sqlReaderQuery": {
+							"value": "select  * from [DWH].[W_ENTITY_D] where 1=1\nAND CASE WHEN '@{pipeline().parameters.ENTITY}' = 'ALL' THEN [Ma_Dvcs] ELSE '@{pipeline().parameters.ENTITY}' END = [Ma_Dvcs]",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "SBC_Azure_Synapse",
+						"type": "DatasetReference",
+						"parameters": {
+							"TGT_TABLE": "''"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach1_copy2",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup1_copy2",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup1_copy2').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 3,
+					"activities": [
+						{
+							"name": "If Condition1_copy1",
+							"type": "IfCondition",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@equals(1,1)",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "pipeline1_copy1",
+										"type": "ExecutePipeline",
+										"dependsOn": [],
+										"userProperties": [],
+										"typeProperties": {
+											"pipeline": {
+												"referenceName": "BRAVO SDE FACT CHILD",
+												"type": "PipelineReference"
+											},
+											"waitOnCompletion": true,
+											"parameters": {
+												"ENTITY": {
+													"value": "@{item().Ma_Dvcs}",
+													"type": "Expression"
+												},
+												"script": {
+													"value": "@pipeline().parameters.script",
+													"type": "Expression"
+												},
+												"TGT_TABLE": {
+													"value": "@pipeline().parameters.TGT_TABLE",
+													"type": "Expression"
+												},
+												"W_ACCOUNT": {
+													"value": "@pipeline().parameters.W_ACCOUNT",
+													"type": "Expression"
+												},
+												"W_BATCH_ID": {
+													"value": "@pipeline().parameters.W_BATCH_ID",
+													"type": "Expression"
+												},
+												"DB": {
+													"value": "@pipeline().parameters.DB",
+													"type": "Expression"
+												},
+												"RUN_MANUAL": {
+													"value": "@pipeline().parameters.RUN_MANUAL",
+													"type": "Expression"
+												}
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"TGT_TABLE": {
+				"type": "string"
+			},
+			"ENTITY": {
+				"type": "string"
+			},
+			"script": {
+				"type": "string"
+			},
+			"W_ACCOUNT": {
+				"type": "string"
+			},
+			"W_BATCH_ID": {
+				"type": "string"
+			},
+			"DB": {
+				"type": "string"
+			},
+			"RUN_MANUAL": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "FINANCE"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-09-21T14:44:37Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

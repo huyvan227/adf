@@ -1,0 +1,288 @@
+{
+	"name": "CR REFRESH PBI DATASET",
+	"properties": {
+		"activities": [
+			{
+				"name": "Oauth2 Login",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "@concat('https://login.microsoftonline.com/',pipeline().parameters.TenantId,'/oauth2/token')",
+						"type": "Expression"
+					},
+					"method": "POST",
+					"headers": {
+						"Content-Type": "application/x-www-form-urlencoded"
+					},
+					"body": {
+						"value": "@concat('grant_type=client_credentials&resource=https://analysis.windows.net/powerbi/api&client_id=',pipeline().parameters.SPClientId,'&client_secret=',encodeUriComponent(pipeline().parameters.SPSecret))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "Call Dataset Refresh",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "Oauth2 Login",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": true,
+					"secureInput": true
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "@concat('https://api.powerbi.com/v1.0/myorg/groups/',pipeline().parameters.PBIAppWorkspaceId,'/datasets/',pipeline().parameters.PBIDatasetId,'/refreshes')",
+						"type": "Expression"
+					},
+					"method": "POST",
+					"headers": {
+						"Authorization": {
+							"value": "@concat(string(activity('Oauth2 Login').output.token_type),' ',string(activity('Oauth2 Login').output.access_token))",
+							"type": "Expression"
+						}
+					},
+					"body": {
+						"helloww": "worldddd"
+					}
+				}
+			},
+			{
+				"name": "Get Dataset Refresh Status",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "Call Dataset Refresh",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "@concat('https://api.powerbi.com/v1.0/myorg/groups/',pipeline().parameters.PBIAppWorkspaceId,'/datasets/',pipeline().parameters.PBIDatasetId,'/refreshes?$top=1')",
+						"type": "Expression"
+					},
+					"method": "GET",
+					"headers": {
+						"Authorization": {
+							"value": "@concat(string(activity('Oauth2 Login').output.token_type),' ',string(activity('Oauth2 Login').output.access_token))",
+							"type": "Expression"
+						}
+					},
+					"body": {
+						"helloww": "worldddd"
+					}
+				}
+			},
+			{
+				"name": "Until Refresh Complete",
+				"type": "Until",
+				"dependsOn": [
+					{
+						"activity": "Set Variable Status",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@not(equals(variables('Status'),'Unknown'))",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Wait 1min",
+							"type": "Wait",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"waitTimeInSeconds": 60
+							}
+						},
+						{
+							"name": "Continue Get Dataset Refresh Status",
+							"type": "WebActivity",
+							"dependsOn": [
+								{
+									"activity": "Oauth2 Re-Login",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": {
+									"value": "@concat('https://api.powerbi.com/v1.0/myorg/groups/',pipeline().parameters.PBIAppWorkspaceId,'/datasets/',pipeline().parameters.PBIDatasetId,'/refreshes?$top=1')",
+									"type": "Expression"
+								},
+								"method": "GET",
+								"headers": {
+									"Authorization": {
+										"value": "@concat(string(activity('Oauth2 Re-Login').output.token_type),' ',string(activity('Oauth2 Re-Login').output.access_token))",
+										"type": "Expression"
+									}
+								},
+								"body": {
+									"helloww": "worldddd"
+								}
+							}
+						},
+						{
+							"name": "Continuing Set Variable Status",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Continue Get Dataset Refresh Status",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "Status",
+								"value": {
+									"value": "@activity('Continue Get Dataset Refresh Status').output.value[0].status",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Oauth2 Re-Login",
+							"type": "WebActivity",
+							"dependsOn": [
+								{
+									"activity": "Wait 1min",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": {
+									"value": "@concat('https://login.microsoftonline.com/',pipeline().parameters.TenantId,'/oauth2/token')",
+									"type": "Expression"
+								},
+								"method": "POST",
+								"headers": {
+									"Content-Type": "application/x-www-form-urlencoded"
+								},
+								"body": {
+									"value": "@concat('grant_type=client_credentials&resource=https://analysis.windows.net/powerbi/api&client_id=',pipeline().parameters.SPClientId,'&client_secret=',encodeUriComponent(pipeline().parameters.SPSecret))",
+									"type": "Expression"
+								}
+							}
+						}
+					],
+					"timeout": "7.00:00:00"
+				}
+			},
+			{
+				"name": "Set Variable Status",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Get Dataset Refresh Status",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "Status",
+					"value": {
+						"value": "@activity('Get Dataset Refresh Status').output.value[0].status",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"TenantId": {
+				"type": "String",
+				"defaultValue": "b060ef55-3a97-4911-a4c0-3b87464e996a"
+			},
+			"SPClientId": {
+				"type": "String",
+				"defaultValue": "ae8b21d5-1255-4660-b6cb-8295f6891d3f"
+			},
+			"SPSecret": {
+				"type": "String",
+				"defaultValue": "NU_GqFi8-42?PH=ZkvUzcXm0crt7399D"
+			},
+			"PBIAppWorkspaceId": {
+				"type": "string",
+				"defaultValue": "24b533de-b886-4330-922c-ba79eecea3f4"
+			},
+			"PBIDatasetId": {
+				"type": "string",
+				"defaultValue": "95ed9957-4818-4386-bd1f-204f65817974"
+			}
+		},
+		"variables": {
+			"Status": {
+				"type": "String",
+				"defaultValue": "Unknown"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-09-21T14:44:26Z",
+		"lastUpdateUtc": "2021-06-29T05:21:58Z",
+		"createTimeUtc": "0001-01-01T00:00:00Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

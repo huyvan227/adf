@@ -1,0 +1,37 @@
+{
+	"name": "Master Pipeline v2",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "MASTER PIPELINE_v2",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"batch_type": 0,
+					"pause_dwh_after_finish": 0
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2022-11-05T03:37:00",
+				"timeZone": "SE Asia Standard Time",
+				"schedule": {
+					"minutes": [
+						59
+					],
+					"hours": [
+						19,
+						11
+					]
+				}
+			}
+		}
+	}
+}

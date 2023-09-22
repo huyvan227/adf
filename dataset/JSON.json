@@ -1,0 +1,81 @@
+{
+	"name": "JSON",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SBC_Blob_Storage",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"folder": {
+				"type": "string"
+			},
+			"file": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@dataset().file",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().folder",
+					"type": "Expression"
+				},
+				"container": "transform-csv-phase2"
+			}
+		},
+		"schema": {
+			"type": "object",
+			"properties": {
+				"TOTAL": {
+					"type": "string"
+				},
+				"PERIOD": {
+					"type": "string"
+				},
+				"PERIOD_VALUE": {
+					"type": "null"
+				},
+				"Volume": {
+					"type": "null"
+				},
+				"Price": {
+					"type": "null"
+				},
+				"PG/Salesman": {
+					"type": "null"
+				},
+				"Trade spend": {
+					"type": "null"
+				},
+				"Employee cost": {
+					"type": "null"
+				},
+				"Load/unload cost": {
+					"type": "null"
+				},
+				"Travel,meeting,guest cost": {
+					"type": "null"
+				},
+				"Phone & car/taxi cost": {
+					"type": "null"
+				},
+				"WH/Office M&R": {
+					"type": "null"
+				},
+				"Bottle usage fee": {
+					"type": "null"
+				},
+				"Other expense": {
+					"type": "null"
+				}
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

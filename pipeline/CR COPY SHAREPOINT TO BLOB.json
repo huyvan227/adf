@@ -1,0 +1,274 @@
+{
+	"name": "CR COPY SHAREPOINT TO BLOB",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get Copy Jobs",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlDWSource",
+						"sqlReaderStoredProcedureName": "[ADF].[PRC_GET_PRE_ETL_JOB_V2]",
+						"storedProcedureParameters": {
+							"pGROUP_NAME": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.GROUP_NAME",
+									"type": "Expression"
+								}
+							},
+							"pGROUP_VALUE": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.GROUP_VALUE",
+									"type": "Expression"
+								}
+							},
+							"pSTAGE_GROUP": {
+								"type": "String",
+								"value": "COPY"
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "SBC_Azure_Synapse1",
+						"type": "DatasetReference",
+						"parameters": {
+							"TGT_TABLE": "Dummy"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "For Each Copy Job",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Get Copy Jobs",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get Copy Jobs').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Copy From Sharepoint To Blob",
+							"type": "AzureFunctionActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 3,
+								"retryIntervalInSeconds": 120,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"functionName": "copy_sharepoint_to_blob",
+								"method": "POST",
+								"body": {
+									"value": "@concat('{\"sharepoint_path\" : \"',item().INPUT_CONTAINER,'\",\"blob_path\" : \"',replace(item().OUTPUT_CONTAINER,'%d',pipeline().parameters.current_data_time),'\"}')",
+									"type": "Expression"
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "az_function_helpers",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Update Success Logs",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Copy From Sharepoint To Blob",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[ADF].[PROC_ETL_LOG_MESSAGE]",
+								"storedProcedureParameters": {
+									"pBATCH_ID": {
+										"value": {
+											"value": "@int(pipeline().parameters.batch_id)",
+											"type": "Expression"
+										},
+										"type": "Int64"
+									},
+									"pERROR_CODE": {
+										"value": null,
+										"type": "String"
+									},
+									"pERROR_MESSAGE": {
+										"value": null,
+										"type": "String"
+									},
+									"pJOB_ID": {
+										"value": {
+											"value": "@item().JOB_ID",
+											"type": "Expression"
+										},
+										"type": "Int64"
+									},
+									"pLOG_MESSAGE": {
+										"value": {
+											"value": "@activity('Copy From Sharepoint To Blob').output.message",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"pLOG_STATUS": {
+										"value": "INFO",
+										"type": "String"
+									},
+									"pSTAGE_GROUP": {
+										"value": {
+											"value": "@item().STAGE_GROUP",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"pJOB_NAME": {
+										"value": {
+											"value": "@item().JOB_NAME",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "SBC_Azure_Synapse",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Update Fail Logs",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Copy From Sharepoint To Blob",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[ADF].[PROC_ETL_LOG_MESSAGE]",
+								"storedProcedureParameters": {
+									"pBATCH_ID": {
+										"value": {
+											"value": "@int(pipeline().parameters.batch_id)",
+											"type": "Expression"
+										},
+										"type": "Int64"
+									},
+									"pERROR_CODE": {
+										"value": null,
+										"type": "String"
+									},
+									"pERROR_MESSAGE": {
+										"value": null,
+										"type": "String"
+									},
+									"pJOB_ID": {
+										"value": {
+											"value": "@item().JOB_ID",
+											"type": "Expression"
+										},
+										"type": "Int64"
+									},
+									"pLOG_MESSAGE": {
+										"value": {
+											"value": "Fail to copy Sharepoint to blob",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"pLOG_STATUS": {
+										"value": "ERROR",
+										"type": "String"
+									},
+									"pSTAGE_GROUP": {
+										"value": {
+											"value": "@item().STAGE_GROUP",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"pJOB_NAME": {
+										"value": {
+											"value": "@item().JOB_NAME",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "SBC_Azure_Synapse",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"current_data_time": {
+				"type": "string"
+			},
+			"batch_id": {
+				"type": "string"
+			},
+			"GROUP_NAME": {
+				"type": "string"
+			},
+			"GROUP_VALUE": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-09-21T14:44:31Z",
+		"lastUpdateUtc": "2022-12-08T09:48:10Z",
+		"createTimeUtc": "0001-01-01T00:00:00Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,38 @@
+{
+	"name": "DELETE PROCESSED DATA TEST",
+	"properties": {
+		"activities": [
+			{
+				"name": "Delete Blob staging",
+				"type": "Delete",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "Blob_Storage_backup_delete",
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "staging"
+						}
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true,
+						"wildcardFileName": "*"
+					}
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2023-09-21T14:44:29Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

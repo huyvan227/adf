@@ -1,0 +1,93 @@
+{
+	"name": "pipeline5",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "ExcelSource",
+						"additionalColumns": [
+							{
+								"name": "W_BATCH_ID",
+								"value": "1"
+							},
+							{
+								"name": "W_INSERT_DATE",
+								"value": {
+									"value": "@addhours(utcnow(),7)",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "W_DATASOURCE_NAME",
+								"value": "EXCEL"
+							},
+							{
+								"name": "W_FILE_PATH",
+								"value": "excel/Sabeco Department.xlsx"
+							}
+						],
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"wildcardFolderPath": "excel",
+							"wildcardFileName": "Sabeco Department.xlsx",
+							"enablePartitionDiscovery": false
+						}
+					},
+					"sink": {
+						"type": "SqlDWSink",
+						"writeBehavior": "Insert",
+						"sqlWriterUseTableLock": false,
+						"tableOption": "autoCreate",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "EXC",
+						"type": "DatasetReference",
+						"parameters": {
+							"SHEET_NAME": "Sheet1"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "SBC_Azure_Synapse1",
+						"type": "DatasetReference",
+						"parameters": {
+							"TGT_TABLE": "[STG].[W_EXC_SABECO_DEPARTMENT_DS]"
+						}
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "FINANCE"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-09-21T14:44:30Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

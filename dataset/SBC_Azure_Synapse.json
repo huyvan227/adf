@@ -1,0 +1,24 @@
+{
+	"name": "SBC_Azure_Synapse",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SBC_Azure_Synapse",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"TGT_TABLE": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlDWTable",
+		"schema": [],
+		"typeProperties": {
+			"tableName": {
+				"value": "@dataset().TGT_TABLE",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

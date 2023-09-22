@@ -1,0 +1,38 @@
+{
+	"name": "Auto_Pause_Synapse",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "CR SYS PAUSE SYNAPSE",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"subscriptions": "1ff46658-2f7b-48bd-8e49-52fadef045ac",
+					"resourceGroups": "rgBIPRD",
+					"servers": "sbcdwhprd",
+					"databases": "dwhprd"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2022-12-13T00:31:00",
+				"timeZone": "SE Asia Standard Time",
+				"schedule": {
+					"minutes": [
+						0
+					],
+					"hours": [
+						23
+					]
+				}
+			}
+		}
+	}
+}

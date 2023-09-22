@@ -1,0 +1,43 @@
+{
+	"name": "SDE",
+	"properties": {
+		"activities": [
+			{
+				"name": "HEADER SDE",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SDE DATA WITH HEADER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "NO HEADER SDE",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "HEADER SDE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SDE DATA WITH NO HEADER",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2023-09-21T14:44:35Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
