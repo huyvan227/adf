@@ -90,20 +90,36 @@
 											},
 											"sink": {
 												"type": "SqlDWSink",
-												"allowCopyCommand": true
+												"writeBehavior": "Insert"
 											},
-											"enableStaging": false
+											"enableStaging": false,
+											"translator": {
+												"type": "TabularTranslator",
+												"typeConversion": true,
+												"typeConversionSettings": {
+													"allowDataTruncation": true,
+													"treatBooleanAsNumber": false
+												}
+											}
 										},
 										"inputs": [
 											{
 												"referenceName": "gs_bravo",
-												"type": "DatasetReference"
+												"type": "DatasetReference",
+												"parameters": {
+													"schema": "''",
+													"name": "''"
+												}
 											}
 										],
 										"outputs": [
 											{
 												"referenceName": "PGSWH",
-												"type": "DatasetReference"
+												"type": "DatasetReference",
+												"parameters": {
+													"Schema": "''",
+													"Table": "''"
+												}
 											}
 										]
 									},
@@ -374,6 +390,14 @@
 						},
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "PGSWH",
+						"type": "DatasetReference",
+						"parameters": {
+							"Schema": "''",
+							"Table": "''"
+						}
 					},
 					"firstRowOnly": false
 				}

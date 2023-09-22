@@ -16,13 +16,17 @@
 				"userProperties": [],
 				"typeProperties": {
 					"source": {
-						"type": "SqlDWSource",
-						"sqlReaderQuery": {
-							"value": "select  * from [DWH].[W_ENTITY_D] where 1=1\nAND CASE WHEN '@{pipeline().parameters.ENTITY}' = 'ALL' THEN [Ma_Dvcs] ELSE '@{pipeline().parameters.ENTITY}' END = [Ma_Dvcs]",
-							"type": "Expression"
-						},
+						"type": "SqlServerSource",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "gs_bravo",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "''",
+							"name": "''"
+						}
 					},
 					"firstRowOnly": false
 				}
