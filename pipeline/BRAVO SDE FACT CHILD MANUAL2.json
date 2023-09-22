@@ -26,15 +26,6 @@
 							"type": "DelimitedTextReadSettings"
 						}
 					},
-					"dataset": {
-						"referenceName": "Blob_Storage_fin",
-						"type": "DatasetReference",
-						"parameters": {
-							"container": "transform-csv-phase2",
-							"filename": "BRAVO_FROM_TO_DATE.txt",
-							"folder": "BRAVO"
-						}
-					},
 					"firstRowOnly": false
 				}
 			},
@@ -151,26 +142,8 @@
 														"sqlWriterUseTableLock": false,
 														"disableMetricsCollection": false
 													},
-													"enableStaging": false,
-													"translator": {
-														"type": "TabularTranslator",
-														"typeConversion": true,
-														"typeConversionSettings": {
-															"allowDataTruncation": true,
-															"treatBooleanAsNumber": false
-														}
-													}
+													"enableStaging": false
 												},
-												"inputs": [
-													{
-														"referenceName": "Bravo_SqlServerTable",
-														"type": "DatasetReference",
-														"parameters": {
-															"schema": "''",
-															"table": "''"
-														}
-													}
-												],
 												"outputs": [
 													{
 														"referenceName": "SBC_Azure_Synapse1",
