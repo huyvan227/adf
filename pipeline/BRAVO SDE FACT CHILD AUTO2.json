@@ -24,13 +24,6 @@
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
-					"dataset": {
-						"referenceName": "SBC_Azure_Synapse",
-						"type": "DatasetReference",
-						"parameters": {
-							"TGT_TABLE": "''"
-						}
-					},
 					"firstRowOnly": false
 				}
 			},
@@ -148,19 +141,7 @@
 														"disableMetricsCollection": false
 													},
 													"enableStaging": false
-												},
-												"outputs": [
-													{
-														"referenceName": "SBC_Azure_Synapse1",
-														"type": "DatasetReference",
-														"parameters": {
-															"TGT_TABLE": {
-																"value": "@pipeline().parameters.TGT_TABLE",
-																"type": "Expression"
-															}
-														}
-													}
-												]
+												}
 											}
 										]
 									},
@@ -244,38 +225,8 @@
 														"sqlWriterUseTableLock": false,
 														"disableMetricsCollection": false
 													},
-													"enableStaging": false,
-													"translator": {
-														"type": "TabularTranslator",
-														"typeConversion": true,
-														"typeConversionSettings": {
-															"allowDataTruncation": true,
-															"treatBooleanAsNumber": false
-														}
-													}
-												},
-												"inputs": [
-													{
-														"referenceName": "Bravo_SqlServerTable_ChuongDuong",
-														"type": "DatasetReference",
-														"parameters": {
-															"schema": "''",
-															"table": "''"
-														}
-													}
-												],
-												"outputs": [
-													{
-														"referenceName": "SBC_Azure_Synapse1",
-														"type": "DatasetReference",
-														"parameters": {
-															"TGT_TABLE": {
-																"value": "@pipeline().parameters.TGT_TABLE",
-																"type": "Expression"
-															}
-														}
-													}
-												]
+													"enableStaging": false
+												}
 											}
 										]
 									}

@@ -65,13 +65,6 @@
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
-					"dataset": {
-						"referenceName": "SBC_Azure_Synapse1",
-						"type": "DatasetReference",
-						"parameters": {
-							"TGT_TABLE": "''"
-						}
-					},
 					"firstRowOnly": false
 				}
 			},
@@ -377,31 +370,7 @@
 									}
 								},
 								"enableStaging": false
-							},
-							"inputs": [
-								{
-									"referenceName": "JSON_FOLDER",
-									"type": "DatasetReference",
-									"parameters": {
-										"folder": {
-											"value": "json/now/@{item().CONTAINER}",
-											"type": "Expression"
-										}
-									}
-								}
-							],
-							"outputs": [
-								{
-									"referenceName": "JSON_FOLDER",
-									"type": "DatasetReference",
-									"parameters": {
-										"folder": {
-											"value": "json/@{formatDateTime(addhours(utcnow(),7),'yyyy')}/@{formatDateTime(addhours(utcnow(),7),'yyyyMMdd')}/@{item().CONTAINER}",
-											"type": "Expression"
-										}
-									}
-								}
-							]
+							}
 						}
 					]
 				}
@@ -419,13 +388,6 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"dataset": {
-						"referenceName": "JSON_FOLDER",
-						"type": "DatasetReference",
-						"parameters": {
-							"folder": "json/now"
-						}
-					},
 					"fieldList": [
 						"exists"
 					],
@@ -470,13 +432,6 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"dataset": {
-									"referenceName": "JSON_FOLDER",
-									"type": "DatasetReference",
-									"parameters": {
-										"folder": "json/now"
-									}
-								},
 								"enableLogging": false,
 								"storeSettings": {
 									"type": "AzureBlobStorageReadSettings",

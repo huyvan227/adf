@@ -33,35 +33,8 @@
 						"sqlWriterUseTableLock": false,
 						"disableMetricsCollection": false
 					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"typeConversion": true,
-						"typeConversionSettings": {
-							"allowDataTruncation": true,
-							"treatBooleanAsNumber": false
-						}
-					}
-				},
-				"inputs": [
-					{
-						"referenceName": "Blob_Storage",
-						"type": "DatasetReference",
-						"parameters": {
-							"container": "transform-csv-phase2",
-							"filename": "job_v2.csv"
-						}
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "SBC_Azure_Synapse",
-						"type": "DatasetReference",
-						"parameters": {
-							"TGT_TABLE": "[ADF].[ETL_JOB_V2]"
-						}
-					}
-				]
+					"enableStaging": false
+				}
 			}
 		],
 		"folder": {

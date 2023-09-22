@@ -45,35 +45,8 @@
 						"tableOption": "autoCreate",
 						"disableMetricsCollection": false
 					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"typeConversion": true,
-						"typeConversionSettings": {
-							"allowDataTruncation": true,
-							"treatBooleanAsNumber": false
-						}
-					}
-				},
-				"inputs": [
-					{
-						"referenceName": "Bravo_SqlServerTable",
-						"type": "DatasetReference",
-						"parameters": {
-							"schema": "''",
-							"table": "''"
-						}
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "SBC_Azure_Synapse",
-						"type": "DatasetReference",
-						"parameters": {
-							"TGT_TABLE": "[STG].[W_BRAVO_CONSOLIDATION_ENTITY_DETAIL_DS]"
-						}
-					}
-				]
+					"enableStaging": false
+				}
 			}
 		],
 		"folder": {

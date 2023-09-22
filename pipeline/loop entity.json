@@ -24,13 +24,6 @@
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
-					"dataset": {
-						"referenceName": "SBC_Azure_Synapse",
-						"type": "DatasetReference",
-						"parameters": {
-							"TGT_TABLE": "''"
-						}
-					},
 					"firstRowOnly": false
 				}
 			},

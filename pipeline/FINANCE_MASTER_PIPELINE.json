@@ -60,13 +60,6 @@
 						},
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
-					},
-					"dataset": {
-						"referenceName": "SBC_Azure_Synapse1",
-						"type": "DatasetReference",
-						"parameters": {
-							"TGT_TABLE": "DUMMY"
-						}
 					}
 				}
 			},
@@ -100,10 +93,6 @@
 				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
-					"pipeline": {
-						"referenceName": "CR SYS RESUME SYNAPSE",
-						"type": "PipelineReference"
-					},
 					"waitOnCompletion": true
 				}
 			},

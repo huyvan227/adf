@@ -58,13 +58,6 @@
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
-					"dataset": {
-						"referenceName": "SBC_Azure_Synapse1",
-						"type": "DatasetReference",
-						"parameters": {
-							"TGT_TABLE": "''"
-						}
-					},
 					"firstRowOnly": false
 				}
 			},
@@ -160,29 +153,7 @@
 									"disableMetricsCollection": false
 								},
 								"enableStaging": false
-							},
-							"inputs": [
-								{
-									"referenceName": "JSON",
-									"type": "DatasetReference",
-									"parameters": {
-										"folder": "''",
-										"file": "''"
-									}
-								}
-							],
-							"outputs": [
-								{
-									"referenceName": "SBC_Azure_Synapse1",
-									"type": "DatasetReference",
-									"parameters": {
-										"TGT_TABLE": {
-											"value": "@{item().TGT_TABLE}",
-											"type": "Expression"
-										}
-									}
-								}
-							]
+							}
 						},
 						{
 							"name": "start",

@@ -53,34 +53,8 @@
 						"tableOption": "autoCreate",
 						"disableMetricsCollection": false
 					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"typeConversion": true,
-						"typeConversionSettings": {
-							"allowDataTruncation": true,
-							"treatBooleanAsNumber": false
-						}
-					}
-				},
-				"inputs": [
-					{
-						"referenceName": "EXC",
-						"type": "DatasetReference",
-						"parameters": {
-							"SHEET_NAME": "Sheet1"
-						}
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "SBC_Azure_Synapse1",
-						"type": "DatasetReference",
-						"parameters": {
-							"TGT_TABLE": "[STG].[W_EXC_SABECO_DEPARTMENT_DS]"
-						}
-					}
-				]
+					"enableStaging": false
+				}
 			}
 		],
 		"folder": {
