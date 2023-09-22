@@ -173,7 +173,7 @@
 								}
 							},
 							"linkedServiceName": {
-								"referenceName": "SBC_Azure_Synapse",
+								"referenceName": "PGSWH",
 								"type": "LinkedServiceReference"
 							}
 						},
@@ -243,7 +243,7 @@
 								}
 							},
 							"linkedServiceName": {
-								"referenceName": "SBC_Azure_Synapse",
+								"referenceName": "PGSWH",
 								"type": "LinkedServiceReference"
 							}
 						},
@@ -316,7 +316,7 @@
 								}
 							},
 							"linkedServiceName": {
-								"referenceName": "SBC_Azure_Synapse",
+								"referenceName": "PGSWH",
 								"type": "LinkedServiceReference"
 							}
 						}
