@@ -3,20 +3,7 @@
 	"properties": {
 		"annotations": [],
 		"runtimeState": "Stopped",
-		"pipelines": [
-			{
-				"pipelineReference": {
-					"referenceName": "CR MASTER PIPELINE",
-					"type": "PipelineReference"
-				},
-				"parameters": {
-					"batch_type": 0,
-					"pause_dwh_after_finish": 1,
-					"GROUP_NAME": "01",
-					"GROUP_VALUE": "DAILY"
-				}
-			}
-		],
+		"pipelines": [],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {

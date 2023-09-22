@@ -111,22 +111,6 @@
 									"path": "staging"
 								}
 							},
-							"inputs": [
-								{
-									"referenceName": "Blob_Storage_No_Header1",
-									"type": "DatasetReference",
-									"parameters": {
-										"container": {
-											"value": "@pipeline().parameters.input_container",
-											"type": "Expression"
-										},
-										"filename": {
-											"value": "@concat(replace(pipeline().parameters.input_path,'%d',pipeline().parameters.current_data_time),'/',item().name)",
-											"type": "Expression"
-										}
-									}
-								}
-							],
 							"outputs": [
 								{
 									"referenceName": "SBC_Azure_Synapse1",
