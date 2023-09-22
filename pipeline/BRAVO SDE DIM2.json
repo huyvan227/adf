@@ -90,16 +90,22 @@
 											},
 											"sink": {
 												"type": "SqlDWSink",
-												"preCopyScript": {
-													"value": "DELETE @{item().TGT_TABLE} WHERE W_BATCH_ID <> '@{pipeline().parameters.p_batch_id}'",
-													"type": "Expression"
-												},
-												"writeBehavior": "Insert",
-												"sqlWriterUseTableLock": false,
-												"disableMetricsCollection": false
+												"allowCopyCommand": true
 											},
 											"enableStaging": false
-										}
+										},
+										"inputs": [
+											{
+												"referenceName": "gs_bravo",
+												"type": "DatasetReference"
+											}
+										],
+										"outputs": [
+											{
+												"referenceName": "PGSWH",
+												"type": "DatasetReference"
+											}
+										]
 									},
 									{
 										"name": "start",
@@ -399,7 +405,7 @@
 			}
 		},
 		"folder": {
-			"name": "FINANCE"
+			"name": "BRAVO"
 		},
 		"annotations": [],
 		"lastPublishTime": "2023-09-21T14:44:31Z"
