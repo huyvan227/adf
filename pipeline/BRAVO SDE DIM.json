@@ -19,7 +19,7 @@
 						"value": "@activity('Lookup1').output.value",
 						"type": "Expression"
 					},
-					"batchCount": 4,
+					"batchCount": 2,
 					"activities": [
 						{
 							"name": "If Condition1_copy1_copy1",
@@ -63,7 +63,7 @@
 														}
 													},
 													{
-														"name": "W_INSERT_DATE",
+														"name": "W_INSERT_DT",
 														"value": {
 															"value": "@addhours(utcnow(),7)",
 															"type": "Expression"
@@ -71,14 +71,7 @@
 													},
 													{
 														"name": "W_DATASOURCE_NAME",
-														"value": "BRAVO"
-													},
-													{
-														"name": "W_ACCOUNT",
-														"value": {
-															"value": "@item().W_ACCOUNT",
-															"type": "Expression"
-														}
+														"value": "BRV"
 													}
 												],
 												"sqlReaderQuery": {
@@ -91,7 +84,7 @@
 											"sink": {
 												"type": "SqlDWSink",
 												"preCopyScript": {
-													"value": "DELETE @{item().TGT_TABLE} WHERE W_BATCH_ID <> '@{pipeline().parameters.p_batch_id}'",
+													"value": "IF OBJECT_ID('@{item().TARGET_SCHEMA}.@{item().TARGET_TABLE}') IS NOT NULL\r\n    TRUNCATE TABLE @{item().TARGET_SCHEMA}.@{item().TARGET_TABLE}",
 													"type": "Expression"
 												},
 												"writeBehavior": "Insert",
@@ -110,21 +103,25 @@
 										},
 										"inputs": [
 											{
-												"referenceName": "Bravo_SqlServerTable",
+												"referenceName": "gs_bravo",
 												"type": "DatasetReference",
 												"parameters": {
 													"schema": "''",
-													"table": "''"
+													"name": "''"
 												}
 											}
 										],
 										"outputs": [
 											{
-												"referenceName": "SBC_Azure_Synapse1",
+												"referenceName": "PGSWH",
 												"type": "DatasetReference",
 												"parameters": {
-													"TGT_TABLE": {
-														"value": "@item().TGT_TABLE",
+													"Schema": {
+														"value": "@item().TARGET_SCHEMA",
+														"type": "Expression"
+													},
+													"Table": {
+														"value": "@item().TARGET_TABLE",
 														"type": "Expression"
 													}
 												}
@@ -146,51 +143,43 @@
 										"typeProperties": {
 											"storedProcedureName": "[ADF].[proc_etl_log_message]",
 											"storedProcedureParameters": {
-												"pBATCH_ID": {
+												"p_batch_id": {
 													"value": {
 														"value": "@pipeline().parameters.p_batch_id",
 														"type": "Expression"
 													},
 													"type": "Int64"
 												},
-												"pERROR_CODE": {
+												"p_error_code": {
 													"value": "",
 													"type": "String"
 												},
-												"pERROR_MESSAGE": {
+												"p_error_message": {
 													"value": "",
 													"type": "String"
 												},
-												"pJOB_ID": {
+												"p_job_id": {
 													"value": {
 														"value": "@item().JOB_ID",
 														"type": "Expression"
 													},
 													"type": "Int64"
 												},
-												"pJOB_NAME": {
-													"value": "",
-													"type": "String"
-												},
-												"pLOG_MESSAGE": {
+												"p_log_message": {
 													"value": {
-														"value": "Start load table @{item().TGT_TABLE}",
+														"value": "Start load table @{item().TARGET_TABLE}",
 														"type": "Expression"
 													},
 													"type": "String"
 												},
-												"pLOG_STATUS": {
-													"value": "",
-													"type": "String"
-												},
-												"pSTAGE_GROUP": {
+												"p_log_status": {
 													"value": "",
 													"type": "String"
 												}
 											}
 										},
 										"linkedServiceName": {
-											"referenceName": "SBC_Azure_Synapse",
+											"referenceName": "PGSWH",
 											"type": "LinkedServiceReference"
 										}
 									},
@@ -216,51 +205,43 @@
 										"typeProperties": {
 											"storedProcedureName": "[ADF].[proc_etl_log_message]",
 											"storedProcedureParameters": {
-												"pBATCH_ID": {
+												"p_batch_id": {
 													"value": {
 														"value": "@pipeline().parameters.p_batch_id",
 														"type": "Expression"
 													},
 													"type": "Int64"
 												},
-												"pERROR_CODE": {
-													"value": "0",
-													"type": "String"
-												},
-												"pERROR_MESSAGE": {
+												"p_error_code": {
 													"value": "",
 													"type": "String"
 												},
-												"pJOB_ID": {
+												"p_error_message": {
+													"value": "",
+													"type": "String"
+												},
+												"p_job_id": {
 													"value": {
 														"value": "@item().JOB_ID",
 														"type": "Expression"
 													},
 													"type": "Int64"
 												},
-												"pJOB_NAME": {
-													"value": "",
-													"type": "String"
-												},
-												"pLOG_MESSAGE": {
+												"p_log_message": {
 													"value": {
-														"value": "Finished load table @{item().TGT_TABLE}",
+														"value": "Finished load table @{item().TARGET_TABLE}",
 														"type": "Expression"
 													},
 													"type": "String"
 												},
-												"pLOG_STATUS": {
+												"p_log_status": {
 													"value": "END",
-													"type": "String"
-												},
-												"pSTAGE_GROUP": {
-													"value": "",
 													"type": "String"
 												}
 											}
 										},
 										"linkedServiceName": {
-											"referenceName": "SBC_Azure_Synapse",
+											"referenceName": "PGSWH",
 											"type": "LinkedServiceReference"
 										}
 									},
@@ -286,54 +267,43 @@
 										"typeProperties": {
 											"storedProcedureName": "[ADF].[proc_etl_log_message]",
 											"storedProcedureParameters": {
-												"pBATCH_ID": {
+												"p_batch_id": {
 													"value": {
 														"value": "@pipeline().parameters.p_batch_id",
 														"type": "Expression"
 													},
 													"type": "Int64"
 												},
-												"pERROR_CODE": {
-													"value": "1",
+												"p_error_code": {
+													"value": "",
 													"type": "String"
 												},
-												"pERROR_MESSAGE": {
-													"value": {
-														"value": "@activity('Copy data').output.error.Message",
-														"type": "Expression"
-													},
+												"p_error_message": {
+													"value": "",
 													"type": "String"
 												},
-												"pJOB_ID": {
+												"p_job_id": {
 													"value": {
 														"value": "@item().JOB_ID",
 														"type": "Expression"
 													},
 													"type": "Int64"
 												},
-												"pJOB_NAME": {
-													"value": "",
-													"type": "String"
-												},
-												"pLOG_MESSAGE": {
+												"p_log_message": {
 													"value": {
-														"value": "Finished load table @{item().TGT_TABLE}",
+														"value": "Finished load table @{item().TARGET_TABLE}",
 														"type": "Expression"
 													},
 													"type": "String"
 												},
-												"pLOG_STATUS": {
+												"p_log_status": {
 													"value": "ERROR",
-													"type": "String"
-												},
-												"pSTAGE_GROUP": {
-													"value": "",
 													"type": "String"
 												}
 											}
 										},
 										"linkedServiceName": {
-											"referenceName": "SBC_Azure_Synapse",
+											"referenceName": "PGSWH",
 											"type": "LinkedServiceReference"
 										}
 									}
@@ -360,6 +330,20 @@
 						"type": "SqlDWSource",
 						"sqlReaderStoredProcedureName": "[ADF].[proc_etl_get_job]",
 						"storedProcedureParameters": {
+							"group_name": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.group_name",
+									"type": "Expression"
+								}
+							},
+							"group_number": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.group_number",
+									"type": "Expression"
+								}
+							},
 							"p_batch_id": {
 								"type": "String",
 								"value": {
@@ -381,17 +365,17 @@
 									"type": "Expression"
 								}
 							},
+							"p_job_sub_group": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.p_job_sub_group",
+									"type": "Expression"
+								}
+							},
 							"p_order": {
 								"type": "String",
 								"value": {
 									"value": "@pipeline().parameters.p_order",
-									"type": "Expression"
-								}
-							},
-							"p_stage_group": {
-								"type": "String",
-								"value": {
-									"value": "@pipeline().parameters.p_stage_group",
 									"type": "Expression"
 								}
 							}
@@ -400,10 +384,11 @@
 						"partitionOption": "None"
 					},
 					"dataset": {
-						"referenceName": "SBC_Azure_Synapse1",
+						"referenceName": "PGSWH",
 						"type": "DatasetReference",
 						"parameters": {
-							"TGT_TABLE": "''"
+							"Schema": "''",
+							"Table": "''"
 						}
 					},
 					"firstRowOnly": false
@@ -417,11 +402,10 @@
 			},
 			"p_job_group": {
 				"type": "string",
-				"defaultValue": "BRAVO"
+				"defaultValue": "BRV"
 			},
 			"p_job_id": {
-				"type": "string",
-				"defaultValue": "ALL"
+				"type": "string"
 			},
 			"p_order": {
 				"type": "string",
@@ -430,16 +414,24 @@
 			"ENTITY": {
 				"type": "string"
 			},
-			"p_stage_group": {
+			"p_job_sub_group": {
 				"type": "string",
-				"defaultValue": "SDE DIM"
+				"defaultValue": "SDE"
+			},
+			"group_name": {
+				"type": "string",
+				"defaultValue": "DX01"
+			},
+			"group_number": {
+				"type": "string",
+				"defaultValue": "ALL"
 			}
 		},
 		"folder": {
-			"name": "FINANCE"
+			"name": "BRAVO"
 		},
 		"annotations": [],
-		"lastPublishTime": "2023-09-21T14:44:31Z"
+		"lastPublishTime": "2023-09-22T03:46:12Z"
 	},
 	"type": "Microsoft.DataFactory/factories/pipelines"
 }
