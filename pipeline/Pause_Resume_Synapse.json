@@ -20,6 +20,9 @@
 						"type": "Expression"
 					},
 					"method": "POST",
+					"body": {
+						"dummy": "dummy"
+					},
 					"authentication": {
 						"type": "MSI",
 						"resource": "https://management.azure.com/"

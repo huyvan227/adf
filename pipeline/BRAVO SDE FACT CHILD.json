@@ -51,6 +51,45 @@
 									}
 								}
 							}
+						},
+						{
+							"name": "BRAVO SDE FACT CHILD_copy1",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "BRAVO SDE FACT CHILD MANUAL2",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"ENTITY": {
+										"value": "@pipeline().parameters.ENTITY",
+										"type": "Expression"
+									},
+									"script": {
+										"value": "@pipeline().parameters.script",
+										"type": "Expression"
+									},
+									"TGT_TABLE": {
+										"value": "@pipeline().parameters.TGT_TABLE",
+										"type": "Expression"
+									},
+									"W_ACCOUNT": {
+										"value": "@pipeline().parameters.W_ACCOUNT",
+										"type": "Expression"
+									},
+									"W_BATCH_ID": {
+										"value": "@pipeline().parameters.W_BATCH_ID",
+										"type": "Expression"
+									},
+									"DB": {
+										"value": "@pipeline().parameters.DB",
+										"type": "Expression"
+									}
+								}
+							}
 						}
 					],
 					"ifTrueActivities": [
