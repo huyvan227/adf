@@ -3,19 +3,7 @@
 	"properties": {
 		"annotations": [],
 		"runtimeState": "Stopped",
-		"pipelines": [
-			{
-				"pipelineReference": {
-					"referenceName": "FINANCE_MASTER_PIPELINE",
-					"type": "PipelineReference"
-				},
-				"parameters": {
-					"batch_type": 0,
-					"pause_dwh_after_finish": 1,
-					"RUN_MANUAL": "0"
-				}
-			}
-		],
+		"pipelines": [],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
