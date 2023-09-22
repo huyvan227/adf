@@ -1,0 +1,67 @@
+{
+	"name": "call_sp",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "exec [dbo].[usp_Vct_SoChiTietBanHang]\t\t\t\r\n    @_DocDate1 = 'Jan 01 2023'\r\n    ,@_DocDate2 = 'Jan 31 2023'\r\n    ,@_DataCode = ''\t\r\n    ,@_CustomerCode =  ''\t\r\n    ,@_lookupModeCustomer = 0\t\r\n    ,@_DocCode =  ''\t\r\n    ,@_StoreCode =  ''\t\r\n    ,@_ItemCode =  ''\t\r\n    ,@_lookupModeItem = 0\t\r\n    ,@_WarehouseCode =  ''\t\r\n    ,@_lookupModeWarehouse = 0\t\r\n    ,@_BizDocId_C2 =  ''\t\r\n    ,@_TransCode =  ''\t\r\n    ,@_ProductCostId =  ''\t\r\n    ,@_DeptCode =  ''\t\r\n    ,@_EmployeeCode =  ''\t\r\n    ,@_DocCodeLst =  ''\t\r\n    ,@_Kieu_Bc = '6'\t\r\n    ,@_ForeignCurrencyOnly= 0\r\n    ,@_nUserId = 0\t\r\n    ,@_LangId = 0\t\r\n    ,@_Ma_Dvcs = 'A02'\r\n    ,@_CurrencyCode0 = 'VND'\r\n    ,@_ProductCategoryCode  =  ''\t\r\n    ,@_WeightCode =  ''\t\r\n    ,@_TrademarkCode =  ''\t\r\n    ,@_GroupCategory =  ''\t\r\n    ,@_TerritoryCode  =  ''\t\r\n    ,@_KTGD  = 0\t\r\n    ,@_QCGD  =  ''\t\r\n    ,@_KTTL  = 0\t\r\n    ,@_GroupBy  =  ''\t\r\n    ,@_Type  =  ''\t\r\n    ,@_GroupCodeRep =  ''",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "gs_bravo",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "''",
+							"name": "''"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "CSV",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2023-09-21T08:33:24Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

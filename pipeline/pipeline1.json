@@ -1,0 +1,67 @@
+{
+	"name": "pipeline1",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy data1",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "exec [dbo].[usp_Kth_TongHopTaiKhoan]\n@_DocDate1 \t= 'Jan 01 2020'\n,@_DocDate2 \t= 'Jan 31 2020'\n,@_Account = ''\n,@_CustomerCode \t= ''\n,@_ForeignCurrencyOnly = 0\n,@_nUserId = 0\n,@_LangId  = 0\n,@_CurrencyCode0 = 'VND'\n,@_Ma_Dvcs = 'A02'\n,@_GroupCodeRep = ''\n,@_BranchCode_Tmp =''",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "gs_bravo",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "''",
+							"name": "''"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "CSV",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2023-09-21T08:33:24Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
