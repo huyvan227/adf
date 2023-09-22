@@ -17,46 +17,16 @@
 				"typeProperties": {
 					"source": {
 						"type": "SqlDWSource",
-						"sqlReaderStoredProcedureName": "[ADF].[proc_etl_get_job]",
-						"storedProcedureParameters": {
-							"p_batch_id": {
-								"type": "String",
-								"value": {
-									"value": "@pipeline().parameters.p_batch_id",
-									"type": "Expression"
-								}
-							},
-							"p_job_group": {
-								"type": "String",
-								"value": {
-									"value": "@pipeline().parameters.p_job_group",
-									"type": "Expression"
-								}
-							},
-							"p_job_id": {
-								"type": "String",
-								"value": {
-									"value": "@pipeline().parameters.p_job_id",
-									"type": "Expression"
-								}
-							},
-							"p_order": {
-								"type": "String",
-								"value": {
-									"value": "@pipeline().parameters.p_order",
-									"type": "Expression"
-								}
-							},
-							"p_stage_group": {
-								"type": "String",
-								"value": {
-									"value": "@pipeline().parameters.p_stage_group",
-									"type": "Expression"
-								}
-							}
-						},
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "PGSWH",
+						"type": "DatasetReference",
+						"parameters": {
+							"Schema": "''",
+							"Table": "''"
+						}
 					},
 					"firstRowOnly": false
 				}
@@ -119,7 +89,7 @@
 											}
 										},
 										"linkedServiceName": {
-											"referenceName": "SBC_Azure_Synapse",
+											"referenceName": "PGSWH",
 											"type": "LinkedServiceReference"
 										}
 									}

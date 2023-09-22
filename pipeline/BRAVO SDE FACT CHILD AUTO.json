@@ -16,10 +16,17 @@
 				"userProperties": [],
 				"typeProperties": {
 					"source": {
-						"type": "SqlDWSource",
-						"sqlReaderQuery": "select\nconvert(varchar(8),dateadd(day,1,eomonth(dateadd(hour,7,GETDATE()),-1)),112) FROM_DATE,\nconvert(varchar(8),eomonth(dateadd(hour,7,GETDATE())),112) TO_DATE\n\n\n--'20221201' FROM_DATE,\n--'20221231' TO_DATE",
+						"type": "SqlServerSource",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "gs_bravo",
+						"type": "DatasetReference",
+						"parameters": {
+							"schema": "''",
+							"name": "''"
+						}
 					},
 					"firstRowOnly": false
 				}
